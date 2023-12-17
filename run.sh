@@ -21,6 +21,7 @@ DOWNLOAD="N"
 BUILD="Y"
 FULL="N"
 MULTI="N"
+SKIP_RUN="N"
 
 ################################################################################
 #                                Global Vars                                 #
@@ -179,7 +180,7 @@ print_help ()
 #                                Parse Options                               #
 ################################################################################
 
-while getopts :mfvlrcdhngp: opt; do
+while getopts :mfvlrcdhngps: opt; do
     case "${opt}" in
           v) VERBOSE="Y"
               echo -e "\033[1mVerbose Mode\033[0m"
@@ -213,6 +214,9 @@ while getopts :mfvlrcdhngp: opt; do
           m) MULTI="Y"
               echo -e "\033[1mMulti-Core execution\033[0m"
               ;;
+          s) SKIP_RUN="Y"
+              echo -e "\033[1mOnly do Evaluation\033[0m"
+              ;;
           h) print_help;;
      esac
 done
@@ -228,6 +232,8 @@ chmod +x ChampSim/Berti/*.sh
 chmod +x ChampSim/Other_PF/*.sh
     
 echo ""
+
+if [[ "$SKIP_RUN" == "N" ]]; then
 
 # Build GCC 7.5.0 from scratch
 if [[ "$GCC" == "Y" ]]; then
@@ -451,6 +457,8 @@ echo -n "Running..."
 cat tmp_par.out | xargs -I CMD -P $NUM_THREAD bash -c CMD
 echo " ${GREEN}done${NC}"
 
+fi # SKIP_RUN
+
 #----------------------------------------------------------------------------#
 #                                Generate Results                            #
 #----------------------------------------------------------------------------#
@@ -478,8 +486,11 @@ echo "| Prefetch | Speedup | L1D Accuracy |"
 while read line; do 
     speed=$(echo $line | cut -d';' -f3)
     accur=$(echo $line | cut -d';' -f5)
-    if [[ $(echo $line | cut -d';' -f1) == "vberti" ]]; then
-        echo "| Berti    | $speed%     | $accur%        |"
+    if [[ $(echo $line | cut -d';' -f1) == "fberti" ]] && 
+        [[ $(echo $line | cut -d';' -f2) == "no" ]]; then
+        echo "| fBerti   | $speed%     | $accur%        |"
+    elif [[ $(echo $line | cut -d';' -f1) == "vberti" ]]; then
+        echo "| vBerti   | $speed%     | $accur%        |"
     elif [[ $(echo $line | cut -d';' -f1) == "ipcp_isca2020" ]]; then
         echo "| IPCP     | $speed%     | $accur%        |"
     elif [[ $(echo $line | cut -d';' -f1) == "mlop_dpc3" ]]; then
@@ -532,9 +543,12 @@ if [[ "$FULL" == "Y" ]]; then
     while read line; do 
         speed=$(echo $line | cut -d';' -f3)
         accur=$(echo $line | cut -d';' -f5)
-        if [[ $(echo $line | cut -d';' -f1) == "vberti" ]] && 
+        if [[ $(echo $line | cut -d';' -f1) == "fberti" ]] && 
             [[ $(echo $line | cut -d';' -f2) == "no" ]]; then
-            echo "| Berti    | $speed%     | $accur%        |"
+            echo "| fBerti   | $speed%     | $accur%        |"
+        elif [[ $(echo $line | cut -d';' -f1) == "vberti" ]] && 
+            [[ $(echo $line | cut -d';' -f2) == "no" ]]; then
+            echo "| vBerti   | $speed%     | $accur%        |"
         elif [[ $(echo $line | cut -d';' -f1) == "ipcp_isca2020" ]] &&
             [[ $(echo $line | cut -d';' -f2) == "no" ]]; then
             echo "| IPCP     | $speed%     | $accur%        |"

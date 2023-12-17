@@ -8,45 +8,51 @@ from scipy.stats import gmean
 if __name__ == "__main__":
     rc('font', size=13)
     name  = []
-    torder = ['IP-stride', 'MLOP', 'IPCP', 'Berti']
+    torder = ['IP-stride', 'MLOP', 'IPCP', 'vBerti', 'fBerti']
     time_a = {
             'IP-stride': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             'IPCP': [],
             'MLOP': [],
             }
 
     late_a = {
             'IP-stride': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             'IPCP': [],
             'MLOP': [],
             }
 
     time_c = {
             'IP-stride': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             'IPCP': [],
             'MLOP': [],
             }
 
     late_c = {
             'IP-stride': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             'IPCP': [],
             'MLOP': [],
             }
 
     time_c2 = {
             'IP-stride': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             'IPCP': [],
             'MLOP': [],
             }
     
     late_c2 = {
             'IP-stride': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             'IPCP': [],
             'MLOP': [],
             }
@@ -54,22 +60,25 @@ if __name__ == "__main__":
     color = {
             'IP-stride': 'snow',
             'MLOP': 'black',
-            'IPCP': 'gray',
-            'Berti': 'lightgray',
+            'IPCP': 'lightgray',
+            'vBerti': 'gray',
+            'fBerti': 'gainsboro',
             }
 
     pattern = {
             'IP-stride': '\\\\\\',
             'MLOP': '',
             'IPCP': '',
-            'Berti': '...',
+            'vBerti': '...',
+            'fBerti': '///',
             }
 
     translation = {
         'ip_stride+no': 'IP-stride',
         'mlop_dpc3+no': 'MLOP',
         'ipcp_isca2020+no': 'IPCP',
-        'vberti+no': 'Berti'
+        'vberti+no': 'vBerti',
+        'fberti+no': 'fBerti',
             }
 
     translation_suite = ['SPEC17-MemInt']

@@ -16,7 +16,8 @@ if __name__ == "__main__":
             #'IP-Stride': [],
             #'BINGO': [],
             #'PPF': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             }
 
     geo   = {
@@ -25,14 +26,16 @@ if __name__ == "__main__":
             #'IP-Stride': [],
             #'BINGO': [],
             #'PPF': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             }
 
     color = {
             'IDEAL': 'whitesmoke',
             'MLOP': 'whitesmoke',
-            'IPCP': 'darkgray',
-            'Berti': 'black',
+            'IPCP': 'gainsboro',
+            'vBerti': 'darkgray',
+            'fBerti': 'black',
             #'IP-Stride': 'silver',
             #'BINGO': 'gainsboro',
             #'PPF': 'snow'
@@ -43,7 +46,8 @@ if __name__ == "__main__":
             'IPCP': '',
             #'IP-Stride': '',
             'MLOP': '',
-            'Berti': '',
+            'vBerti': '',
+            'fBerti': '',
             #'PPF': '///',
             #'BINGO': '///' 
             }
@@ -54,7 +58,8 @@ if __name__ == "__main__":
         #'ip_stride+no': 'IP-Stride',
         #'no+bingo_dpc3': 'BINGO',
         #'no+ppf': 'PPF',
-        'vberti+no': 'Berti'
+        'vberti+no': 'vBerti',
+        'fberti+no': 'fBerti',
             }
 
     translation_suite = ['SPEC17-MemInt']
@@ -107,9 +112,9 @@ if __name__ == "__main__":
     # Idx
     x = np.arange(len(bench))
     fig, ax = plt.subplots(figsize=(7,2.5))
-    elem = [-.25, 0, .25]
+    elem = [-.75, -.25, .25, .75]
     for i, j in zip(order, elem):
-        ax.bar(x+j, order[i], width=.25, edgecolor='black', zorder=3,
+        ax.bar(x+j, order[i], width=.5, edgecolor='black', zorder=3,
                 color=color[i], hatch=pattern[i], label=i)
         if i in text:
             for ii in text[i]:
@@ -135,7 +140,7 @@ if __name__ == "__main__":
 
     #legend = plt.legend(loc=10, bbox_to_anchor=(0.5, .85), prop={'size': 15.5},
     legend = plt.legend(loc=10, bbox_to_anchor=(0.5, 1.15),
-          ncol=3, edgecolor='black', framealpha=1.0)
+          ncol=4, edgecolor='black', framealpha=1.0)
     legend.get_frame().set_alpha(None)
     legend.get_frame().set_facecolor((0, 0, 0, 0))
 

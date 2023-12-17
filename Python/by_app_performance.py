@@ -19,25 +19,30 @@ if __name__ == "__main__":
     order = {
             'MLOP': [],
             'IPCP': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             }
 
     geo   = {
             'MLOP': [],
             'IPCP': [],
-            'Berti': [],
+            'vBerti': [],
+            'fBerti': [],
             }
 
     color = {
+            'IDEAL': 'whitesmoke',
             'MLOP': 'whitesmoke',
-            'IPCP': 'darkgray',
-            'Berti': 'black',
+            'IPCP': 'gainsboro',
+            'vBerti': 'darkgray',
+            'fBerti': 'black',
             }
 
     pattern = {
             'MLOP': '',
             'IPCP': '',
-            'Berti': '',
+            'vBerti': '',
+            'fBerti': '',
             }
 
     translation = {
@@ -47,7 +52,8 @@ if __name__ == "__main__":
         #'vberti_ross_hash_no': 'Berti',
         #'vberti_no': 'Berti',
         #'vberti_ross_hash_launch_lanzar_8_filtro_no': 'Berti',
-        'vberti_no': 'Berti',
+        'vberti_no': 'vBerti',
+        'fberti_no': 'fBerti',
         #'vberti_ross_hash_last_filter_no': 'Berti',
         #'vberti_last_filter_no': 'Berti',
             }
@@ -106,9 +112,10 @@ if __name__ == "__main__":
         bars.append("GEOMEAN")
 
     arrows_format = {
-            'MLOP': (-.90, .1),
-            'IPCP': (-0.25, .3),
-            'Berti': (0.35, 0.1),
+            'MLOP': (-.80, .2),
+            'IPCP': (-.40, .1),
+            'vBerti': (.20, .3),
+            'fBerti': (.60, .1),
             }
 
     with_arrows = {
@@ -120,13 +127,13 @@ if __name__ == "__main__":
         fig, ax = plt.subplots(figsize=(15,4))
     else:
         fig, ax = plt.subplots(figsize=(15,5))
-    elem = [-.25, 0, .25]
+    elem = [-.3, -.1, .1, .3]
     for i, j in zip(order, elem):
         line = "{};".format(i)
         for ii, jj in zip(order[i], bars):
             line = "{} {}: {} | ".format(line, jj, ii)
         print(line)
-        ax.bar(x+j, order[i], width=.25, edgecolor='black', zorder=3,
+        ax.bar(x+j, order[i], width=.2, edgecolor='black', zorder=3,
                 color=color[i], hatch=pattern[i], label=i)
 
         if i in text:
