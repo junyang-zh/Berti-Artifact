@@ -268,14 +268,15 @@ if [[ "$BUILD" == "Y" ]]; then
         echo "============================================================" >> $LOG
     fi
 
-    echo -n "Building Berti..."
+    echo -n "Building Filtered Berti..."
     cd $BERTI
-    run_compile "./build_champsim.sh hashed_perceptron no vberti no no no no no\
+    run_compile "./build_champsim.sh hashed_perceptron no fberti no no no no no\
             lru lru lru srrip drrip lru lru lru 1 no"
     cd $DIR
     
-    # Build MLOP, IPCP and IP Stride
+    # Build MLOP, IPCP, IP Stride and vanilla Berti
     cd $PF
+
     echo -n "Building MLOP..."
     run_compile "./build_champsim.sh hashed_perceptron no mlop_dpc3 no no no no no\
             lru lru lru srrip drrip lru lru lru 1 no"
@@ -286,6 +287,10 @@ if [[ "$BUILD" == "Y" ]]; then
     
     echo -n "Building IP Stride..."
     run_compile "./build_champsim.sh hashed_perceptron no ip_stride no no no no no\
+            lru lru lru srrip drrip lru lru lru 1 no"
+    
+    echo -n "Building (vanilla) Berti..."
+    run_compile "./build_champsim.sh hashed_perceptron no vberti no no no no no\
             lru lru lru srrip drrip lru lru lru 1 no"
 
     if [[ "$FULL" == "Y" ]]; then

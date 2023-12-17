@@ -1,7 +1,7 @@
-#ifndef VBERTI_H_
-#define VBERTI_H_
+#ifndef FBERTI_H_
+#define FBERTI_H_
 
-#include "vberti_size.h"
+#include "fberti_size.h"
 
 #include "cache.h"
 #include <algorithm>
@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-// vBerti defines
+// fBerti defines
 # define LATENCY_TABLE_SIZE           (L1D_MSHR_SIZE + 16)
 
 // Mask
@@ -71,26 +71,26 @@ typedef struct Stride {
     Stride(): conf(0), stride(0), rpl(0), per(0) {};
 } stride_t; 
 
-typedef struct VBerti {
+typedef struct FBerti {
     stride_t *stride;
     uint64_t conf;
     uint64_t total_used;
-} vberti_t; // This struct is the history table
+} fberti_t; // This struct is the history table
 
 typedef struct shadow_cache {
     uint64_t addr; // IP Tag
     uint64_t lat;  // Latency
     uint8_t  pf;   // Is this accesed
-} shadow_cache_t; // This struct is the vberti table
+} shadow_cache_t; // This struct is the fberti table
 
 // Structs
 latency_table_t latencyt[NUM_CPUS][LATENCY_TABLE_SIZE];
 // Cache Style
 history_table_t historyt[NUM_CPUS][HISTORY_TABLE_SET][HISTORY_TABLE_WAY];
 shadow_cache_t scache[NUM_CPUS][L1D_SET][L1D_WAY];
-std::map<uint64_t, vberti_t*> vbertit[NUM_CPUS];
+std::map<uint64_t, fberti_t*> fbertit[NUM_CPUS];
 // To Make a FIFO MAP
-std::queue<uint64_t> vbertit_queue[NUM_CPUS];
+std::queue<uint64_t> fbertit_queue[NUM_CPUS];
 
 // Auxiliar pointers
 history_table_t *history_pointers[NUM_CPUS][HISTORY_TABLE_SET];
@@ -123,9 +123,9 @@ uint16_t history_table_get(uint32_t cpu, uint32_t latency,
         uint64_t addr[HISTORY_TABLE_WAY], uint64_t cycle);
 
 // Auxiliar history table functions
-void vberti_table_add(uint64_t tag, uint32_t cpu, int64_t stride);
-uint8_t vberti_table_get(uint64_t tag, uint32_t cpu, stride_t res[MAX_PF]);
-void vberti_increase_conf_ip(uint64_t tag, uint32_t cpu);
+void fberti_table_add(uint64_t tag, uint32_t cpu, int64_t stride);
+uint8_t fberti_table_get(uint64_t tag, uint32_t cpu, stride_t res[MAX_PF]);
+void fberti_increase_conf_ip(uint64_t tag, uint32_t cpu);
 
 void find_and_update(uint32_t cpu, uint64_t latency, uint64_t tag, 
         uint64_t cycle, uint64_t line_addr);

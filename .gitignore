@@ -1,0 +1,9 @@
+__pycache__
+traces
+output
+bin
+obj
+*.csv
+*.in
+*.out
+*.pdf
