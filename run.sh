@@ -22,6 +22,7 @@ BUILD="Y"
 FULL="N"
 MULTI="N"
 SKIP_RUN="N"
+SKIP_BASELINES="N"
 
 ################################################################################
 #                                Global Vars                                 #
@@ -180,46 +181,50 @@ print_help ()
 #                                Parse Options                               #
 ################################################################################
 
-while getopts :mfvlrcdhngps: opt; do
+while getopts "cdfghlmnp:rstv" opt; do
     case "${opt}" in
-          v) VERBOSE="Y"
-              echo -e "\033[1mVerbose Mode\033[0m"
+          c) REMOVE_ALL="Y"
+              echo -e "\033[1m${RED}REMOVING ALL TEMPORAL FILES (traces and gcc7.5)${NC}\033[0m"
               ;;
+          d) DOCKER="Y"
+              echo -e "\033[1mBuilding with Docker\033[0m"
+              ;;
+          f) FULL="Y"
+              echo -e "\033[1mFull execution\033[0m"
+              ;;
+          g) GCC="Y"
+              echo -e "\033[1mDownloading and Building with GCC 7.5\033[0m"
+              ;;
+          h) print_help;;
           l) LOGGED="Y"
               echo -e "\033[1mLog Mode\033[0m"
               echo -n "" > $LOG
               ;;
-          g) GCC="Y"
-              echo -e "\033[1mDownloading and Building with GCC 7.5\033[0m"
+          m) MULTI="Y"
+              echo -e "\033[1mMulti-Core execution\033[0m"
+              ;;
+          n) BUILD="N"
+              echo -e "\033[1mNOT build the simulator\033[0m"
               ;;
           p) PARALLEL="Y"
               NUM_THREAD=${OPTARG}
               echo -e "\033[1mRunning in Parallel\033[0m"
               ;;
-          d) DOCKER="Y"
-              echo -e "\033[1mBuilding with Docker\033[0m"
-              ;;
-          c) REMOVE_ALL="Y"
-              echo -e "\033[1m${RED}REMOVING ALL TEMPORAL FILES (traces and gcc7.5)${NC}\033[0m"
-              ;;
           r) DOWNLOAD="Y"
               echo -e "\033[1mAlways download SPEC CPU2K17 traces\033[0m"
-              ;;
-          n) BUILD="N"
-              echo -e "\033[1mNOT build the simulator\033[0m"
-              ;;
-          f) FULL="Y"
-              echo -e "\033[1mFull execution\033[0m"
-              ;;
-          m) MULTI="Y"
-              echo -e "\033[1mMulti-Core execution\033[0m"
               ;;
           s) SKIP_RUN="Y"
               echo -e "\033[1mOnly do Evaluation\033[0m"
               ;;
-          h) print_help;;
+          t) SKIP_BASELINES="Y"
+              echo -e "\033[1mSkip running the baselines\033[0m"
+              ;;
+          v) VERBOSE="Y"
+              echo -e "\033[1mVerbose Mode\033[0m"
+              ;;
      esac
 done
+
 
 ################################################################################
 #                                Scripts Body                                #
@@ -281,23 +286,25 @@ if [[ "$BUILD" == "Y" ]]; then
     cd $DIR
     
     # Build MLOP, IPCP, IP Stride and vanilla Berti
-    cd $PF
+    if [[ "$SKIP_BASELINES" == "N" ]]; then
+        cd $PF
 
-    echo -n "Building MLOP..."
-    run_compile "./build_champsim.sh hashed_perceptron no mlop_dpc3 no no no no no\
-            lru lru lru srrip drrip lru lru lru 1 no"
-    
-    echo -n "Building IPCP..."
-    run_compile "./build_champsim.sh hashed_perceptron no ipcp_isca2020 no no no no\
-            no lru lru lru srrip drrip lru lru lru 1 no"
-    
-    echo -n "Building IP Stride..."
-    run_compile "./build_champsim.sh hashed_perceptron no ip_stride no no no no no\
-            lru lru lru srrip drrip lru lru lru 1 no"
-    
-    echo -n "Building (vanilla) Berti..."
-    run_compile "./build_champsim.sh hashed_perceptron no vberti no no no no no\
-            lru lru lru srrip drrip lru lru lru 1 no"
+        echo -n "Building MLOP..."
+        run_compile "./build_champsim.sh hashed_perceptron no mlop_dpc3 no no no no no\
+                lru lru lru srrip drrip lru lru lru 1 no"
+        
+        echo -n "Building IPCP..."
+        run_compile "./build_champsim.sh hashed_perceptron no ipcp_isca2020 no no no no\
+                no lru lru lru srrip drrip lru lru lru 1 no"
+        
+        echo -n "Building IP Stride..."
+        run_compile "./build_champsim.sh hashed_perceptron no ip_stride no no no no no\
+                lru lru lru srrip drrip lru lru lru 1 no"
+        
+        echo -n "Building (vanilla) Berti..."
+        run_compile "./build_champsim.sh hashed_perceptron no vberti no no no no no\
+                lru lru lru srrip drrip lru lru lru 1 no"
+    fi
 
     if [[ "$FULL" == "Y" ]]; then
         echo -n "Building No Prefetcher..."

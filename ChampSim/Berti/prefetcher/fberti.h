@@ -83,18 +83,6 @@ typedef struct shadow_cache {
     uint8_t  pf;   // Is this accesed
 } shadow_cache_t; // This struct is the fberti table
 
-// Structs
-latency_table_t latencyt[NUM_CPUS][LATENCY_TABLE_SIZE];
-// Cache Style
-history_table_t historyt[NUM_CPUS][HISTORY_TABLE_SET][HISTORY_TABLE_WAY];
-shadow_cache_t scache[NUM_CPUS][L1D_SET][L1D_WAY];
-std::map<uint64_t, fberti_t*> fbertit[NUM_CPUS];
-// To Make a FIFO MAP
-std::queue<uint64_t> fbertit_queue[NUM_CPUS];
-
-// Auxiliar pointers
-history_table_t *history_pointers[NUM_CPUS][HISTORY_TABLE_SET];
-
 void notify_prefetch(uint64_t addr, uint64_t cycle);
 
 // Auxiliary latency table functions

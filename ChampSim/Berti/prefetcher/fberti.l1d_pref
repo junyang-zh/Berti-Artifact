@@ -1,8 +1,26 @@
 #include "fberti.h"
+#include "sketch/CUSketch.h"
 
 #define LANZAR_INT 8
 
-// Last edit: 27 - Sept - 2021 12:10
+#define FILTER_THRESHOLD 4
+
+#define COLDFILTER_SIZE 64
+#define COLDFILTER_HASHES 8
+using ColdFilter = CUSketch<COLDFILTER_SIZE, COLDFILTER_HASHES>;
+ColdFilter *cold_filter[NUM_CPUS];
+
+// Structs
+latency_table_t latencyt[NUM_CPUS][LATENCY_TABLE_SIZE];
+// Cache Style
+history_table_t historyt[NUM_CPUS][HISTORY_TABLE_SET][HISTORY_TABLE_WAY];
+shadow_cache_t scache[NUM_CPUS][L1D_SET][L1D_WAY];
+std::map<uint64_t, fberti_t*> fbertit[NUM_CPUS];
+// To Make a FIFO MAP
+std::queue<uint64_t> fbertit_queue[NUM_CPUS];
+
+// Auxiliar pointers
+history_table_t *history_pointers[NUM_CPUS][HISTORY_TABLE_SET];
 
 // FIFO queue
 //#define SIZE_RR 16
@@ -468,7 +486,7 @@ uint16_t history_table_get(uint32_t cpu, uint32_t latency,
 /*                      Latency table functions                               */
 /******************************************************************************/
 // Auxiliar history table functions
-void vberti_increase_conf_ip(uint64_t tag, uint32_t cpu)
+void fberti_increase_conf_ip(uint64_t tag, uint32_t cpu)
 {
     if (fbertit[cpu].find(tag) == fbertit[cpu].end()) return;
 
@@ -673,12 +691,12 @@ void find_and_update(uint32_t cpu, uint64_t latency, uint64_t tag,
     // Get the IPs that can launch a prefetch
     num_on_time = history_table_get(cpu, latency, tag, line_addr, ip, addr, cycle);
 
-    //vberti_increase_conf_ip(tag, cpu);
+    //fberti_increase_conf_ip(tag, cpu);
     
     for (uint32_t i = 0; i < num_on_time; i++)
     {
         // Increase conf ip
-        if (i == 0) vberti_increase_conf_ip(tag, cpu);
+        if (i == 0) fberti_increase_conf_ip(tag, cpu);
         
         // Max number of strides that we can find
         if (i >= MAX_HISTORY_IP) break;
@@ -702,12 +720,17 @@ void find_and_update(uint32_t cpu, uint64_t latency, uint64_t tag,
 
 void CACHE::l1d_prefetcher_initialize() 
 {
+    for (int i = 0; i < NUM_CPUS; ++i) {
+        cold_filter[i] = new ColdFilter;
+    }
     shadow_cache_init(cpu);
     latency_table_init(cpu);
     history_table_init(cpu);
 
     std::cout << "History Sets: " << HISTORY_TABLE_SET << std::endl;
     std::cout << "History Ways: " << HISTORY_TABLE_WAY << std::endl;
+    std::cout << "ColdFilter Size: " << COLDFILTER_SIZE << std::endl;
+    std::cout << "ColdFilter Hashes: " << COLDFILTER_HASHES << std::endl;
     std::cout << "BERTI Size: " << BERTI_TABLE_SIZE << std::endl;
     std::cout << "BERTI Stride Size: " << BERTI_TABLE_STRIDE_SIZE << std::endl;
 }
@@ -715,6 +738,9 @@ void CACHE::l1d_prefetcher_initialize()
 void CACHE::l1d_prefetcher_operate(uint64_t addr, uint64_t ip, uint8_t cache_hit,
         uint8_t type, uint8_t critical_ip_flag)
 {
+    cold_filter[cpu]->insert(ip);
+    if (cold_filter[cpu]->query(ip) < FILTER_THRESHOLD) return;
+
     assert(type == LOAD || type == RFO);
     
     uint64_t line_addr = (addr >> LOG2_BLOCK_SIZE); // Line addr
