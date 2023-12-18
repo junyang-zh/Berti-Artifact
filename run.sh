@@ -411,24 +411,26 @@ for i in $(ls $BERTI/bin/*1core*); do
     fi
 done
 
-for i in $(ls $PF/bin/*1core*); do
-    if [[ "$LOGGED" == "Y" ]]; then
-        echo "$PF/bin/$i" >> $LOG
-        strings -a $i | grep "GCC: " >> $LOG 2>&1
-    fi
-    name=$(echo $i | rev | cut -d/ -f1 | rev)
+if [[ "$SKIP_BASELINES" == "N" ]]; then
+    for i in $(ls $PF/bin/*1core*); do
+        if [[ "$LOGGED" == "Y" ]]; then
+            echo "$PF/bin/$i" >> $LOG
+            strings -a $i | grep "GCC: " >> $LOG 2>&1
+        fi
+        name=$(echo $i | rev | cut -d/ -f1 | rev)
 
-    OUT=$OUT_BASE/spec2k17
-    aux=$i
-    file_trace $i $TRACES_SPEC $name >> tmp_par.out
+        OUT=$OUT_BASE/spec2k17
+        aux=$i
+        file_trace $i $TRACES_SPEC $name >> tmp_par.out
 
-    if [[ "$FULL" == "Y" ]]; then
-        OUT=$OUT_BASE/gap
-        file_trace $aux $TRACES_GAP $name >> tmp_par.out
-        OUT=$OUT_BASE/cloudsuite
-        file_trace $aux $TRACES_CS $name >> tmp_par.out
-    fi
-done
+        if [[ "$FULL" == "Y" ]]; then
+            OUT=$OUT_BASE/gap
+            file_trace $aux $TRACES_GAP $name >> tmp_par.out
+            OUT=$OUT_BASE/cloudsuite
+            file_trace $aux $TRACES_CS $name >> tmp_par.out
+        fi
+    done
+fi
 
 # Run in parallel
 
