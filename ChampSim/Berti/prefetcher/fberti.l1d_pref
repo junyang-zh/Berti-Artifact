@@ -1,13 +1,14 @@
 #include "fberti.h"
-#include "sketch/CUSketch.h"
+#include "sketch/SlidingCUSketch.h"
 
 #define LANZAR_INT 8
 
-#define FILTER_THRESHOLD 4
+#define FILTER_THRESHOLD 2
 
-#define COLDFILTER_SIZE 64
-#define COLDFILTER_HASHES 8
-using ColdFilter = CUSketch<COLDFILTER_SIZE, COLDFILTER_HASHES>;
+#define COLDFILTER_PC_WINDOW 2
+#define COLDFILTER_SIZE 128
+#define COLDFILTER_HASHES 4
+using ColdFilter = SlidingCUSketch<COLDFILTER_SIZE, COLDFILTER_HASHES>;
 ColdFilter *cold_filter[NUM_CPUS];
 
 // Structs
@@ -738,8 +739,10 @@ void CACHE::l1d_prefetcher_initialize()
 void CACHE::l1d_prefetcher_operate(uint64_t addr, uint64_t ip, uint8_t cache_hit,
         uint8_t type, uint8_t critical_ip_flag)
 {
-    cold_filter[cpu]->insert(ip);
-    if (cold_filter[cpu]->query(ip) < FILTER_THRESHOLD) return;
+    int cf_key = ip << COLDFILTER_PC_WINDOW;
+    cold_filter[cpu]->tick();
+    cold_filter[cpu]->insert(cf_key);
+    if (cold_filter[cpu]->query(cf_key) < FILTER_THRESHOLD) return;
 
     assert(type == LOAD || type == RFO);
     

@@ -9,14 +9,14 @@
 using namespace std;
 
 template <int memory_in_bytes, int d>
-class CUSketch
+class SlidingCUSketch
 {
 private:
     static constexpr int w = memory_in_bytes * 8 / 32;
-	int counters[w];
+	int counters[w][2], morning;
 	BOBHash32 * hash[d];
 public:
-    CUSketch()
+    SlidingCUSketch()
     {
         memset(counters, 0, sizeof(counters));
         for (int i = 0; i < d; i++)
@@ -30,7 +30,7 @@ public:
         printf("\tMemory: %.6lfMB\n", w * 4.0 / 1024 / 1024);
     }
 
-    virtual ~CUSketch()
+    virtual ~SlidingCUSketch()
     {
         for (int i = 0; i < d; i++)
             delete hash[i];
@@ -44,13 +44,13 @@ public:
 
         for (int i = 0; i < d; i++) {
             index[i] = (hash[i]->run((const char *)&key, 4)) % w;
-            value[i] = counters[index[i]];
+            value[i] = counters[index[i]][0];
             min_val = min(min_val, value[i]);
         }
 
         int temp = min_val + f;
         for (int i = 0; i < d; i++) {
-            counters[index[i]] = max(counters[index[i]], temp);
+            counters[index[i]][0] = max(counters[index[i]][0], temp);
         }
     }
 
@@ -58,10 +58,17 @@ public:
     {
         int ret = 1 << 30;
         for (int i = 0; i < d; i++) {
-            int tmp = counters[(hash[i]->run((const char *)&key, 4)) % w];
+            int index = (hash[i]->run((const char *)&key, 4)) % w;
+            int tmp = counters[index][0] + counters[index][1];
             ret = min(ret, tmp);
         }
         return ret;
+    }
+
+    void tick() {
+        counters[morning][1] = counters[morning][0];
+        counters[morning][0] = 0;
+        morning = (morning + 1) % w;
     }
 
     int batch_query(uint32_t * data, int n) {
